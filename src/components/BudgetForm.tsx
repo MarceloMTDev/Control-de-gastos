@@ -32,7 +32,7 @@ export default function BudgetForm() {
           className="w-full bg-white border border-gray-200 p-2"
           placeholder="Define tu presupuesto"
           name="budget"
-          value={isNaN(budget) ? "" : budget}
+          value={budget === 0 || isNaN(budget) ? "" : budget}
           onChange={handleChange}
         />
       </div>

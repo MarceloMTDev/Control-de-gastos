@@ -4,6 +4,8 @@ import DatePicker from 'react-date-picker';
 import 'react-calendar/dist/Calendar.css'
 import 'react-date-picker/dist/DatePicker.css'
 import type { DraftExpense, Value } from "../types";
+import ErrorMessage from "./ErrorMessage";
+import { useBudget } from "../hooks/useBudget";
 
 export default function ExpenseForm() {
 
@@ -14,8 +16,12 @@ export default function ExpenseForm() {
         date: new Date(),
     })
 
+    const [error, setError] = useState('')
+    
+    const { dispatch } = useBudget()
+
     const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
-        const {name, value} = e.target
+        const { name, value } = e.target
         const isAmountField = ['amount'].includes(name)
         setExpense({
             ...expense,
@@ -30,12 +36,25 @@ export default function ExpenseForm() {
         })
     }
 
+    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        //validar
+        if (Object.values(expense).includes('')) {
+            setError('Todos los campos son obligatorios')
+            return
+        }
+
+        //Agregar nuevo gasto
+        dispatch({type: 'add-expense', payload: {expense}})
+    }
+
     return (
-        <form
-            className="space-y-5">
+        <form className="space-y-5" onSubmit={handleSubmit}>
             <legend className="uppercase text-center texto-2xl font-black border-b-4 border-blue-500 py-2"
             >Nuevo Gasto</legend>
 
+            {error && <ErrorMessage>{error}</ErrorMessage>}
             <div className="flex flex-col gap-2">
                 <label
                     htmlFor="expenseName"
@@ -63,7 +82,7 @@ export default function ExpenseForm() {
                     id="amount"
                     placeholder="Añade la cantidad del gasto"
                     className="bg-slate-100 p-2"
-                    value={expense.amount}
+                    value={expense.amount === 0 ? '' : expense.amount}
                     onChange={handleChange}
                 />
             </div>
